@@ -1,0 +1,178 @@
+---
+title: "Midterm Project"
+author: "Audrey Omidsalar"
+date: "10/24/2021"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    keep_md: yes
+  github_document:
+  always_allow_html: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library('data.table')
+library('tidytext')
+library('ggplot2')
+library('dplyr')
+library('tibble')
+library('forcats')
+library('tidyr')
+library('tidyverse')
+```
+
+
+```{r download, cache = TRUE}
+if (!file.exists("Quarterly_Census_of_Employment_and_Wages__QCEW_.csv"))
+  download.file(
+    url = "https://data.edd.ca.gov/api/views/fisq-v939/rows.csv?accessType=DOWNLOAD",
+    destfile = "Quarterly_Census_of_Employment_and_Wages__QCEW_.csv",
+    method   = "libcurl",
+    timeout  = 60
+    )
+input <- data.table::fread("Quarterly_Census_of_Employment_and_Wages__QCEW_.csv")
+```
+
+#Introduction
+An issue that I have seen being constantly spoken about is the economy and the rise of inflation. Being a student in the science field, I have very little background on economics; frankly, the last time I took a course in economics was in high school. I was interested in examining wage disparities, more specifically throughout California and within the education sector, as this is applicable to my area of work.
+
+#### The question that I will be exploring is:
+#### How have wages throughout California, especially within the education sector, changed from 2004 until 2021?
+
+# Methods
+The dataset I used is California's Quarterly Census of Employment and Wages from data.gov (web address: https://catalog.data.gov/dataset/quarterly-census-of-employment-and-wages-qcew). It contains average weekly wages for various industries from 2004 to 2021, also categorized by county and ownership (state government, local government, private).
+
+This dataset is quite large (531.5 MB), so I cleaned the data with a number of steps:
+1. I filtered the dataset to only include average annual wages. This dataset has a column named *quarter*, which subdivides the data per each quarter (1st through 4th) as well as the annual values. In order to control for fluctuations throughout the year, I used the annual values for the subsequent steps.
+2. There were triplicate repeats of each entry based on variations in the NAICS (North American Industry Classification System) code entry. These were removed so that there were fewer observations.
+3. A smaller dataset (*education*) was made by subsetting the dataset by NAICS code values that begin with 61, which is the code for Education Services (https://www.naics.com/search/).
+
+The graphs in this report were made using the ggplot2 package.
+
+#### Dependencies / Packages Used:
+* data.table
+* tidytext
+* ggplot2
+* dplyr
+* tibble
+* forcats
+* tidyr
+* tidyverse
+
+```{r filtering}
+#step 1
+input <- filter(input, Quarter == "Annual")
+input <- filter(input, `Area Type` != "United States")
+input = subset(input, select = -c(`1st Month Emp`,`2nd Month Emp`, `3rd Month Emp`) )
+#step 2
+input[, n := 1:.N, by = .(Establishments, `Average Weekly Wages`)]
+input <- input[n == 1,][, n := NULL]
+#step 3
+education <- input %>% filter(str_detect(`NAICS Code`, '^61'))
+```
+
+# Results
+
+1. Which industries have the highest and lowest wages? ##change for 2020??
+```{r}
+industries <- input[, .(
+  Average_Weekly_Wages = mean(`Average Weekly Wages`, na.rm =TRUE),
+  year = Year,
+  county = `Area Name`), by = .(`Industry Name`)
+]
+industries <- distinct(industries, `Industry Name`, .keep_all = TRUE)
+industries[order(-industries$Average_Weekly_Wages), ] %>% head(5)
+topindustries <- input %>% group_by(`Industry Name`) %>% top_n(1, `Average Weekly Wages`)
+topindustries[order(-topindustries$`Average Weekly Wages`), ] %>% head(5) %>% select(`Industry Name`, `Year`, `Average Weekly Wages`) %>% knitr::kable(caption = "5 Industries with the Highest Average Weekly Wages")
+bottomindustries <- input[`Average Weekly Wages` != 0] %>% group_by(`Industry Name`) %>% top_n(-1, `Average Weekly Wages`)
+bottomindustries[order(bottomindustries$`Average Weekly Wages`), ] %>% head(5) %>% select(`Industry Name`, `Year`, `Average Weekly Wages`) %>% knitr::kable(caption = "5 Industries with the Lowest Average Weekly Wages")
+```
+2. Which counties have the highest and lowest average weekly wages?
+```{r}
+topcounties <- input %>% group_by(`Area Name`) %>% top_n(1, `Average Weekly Wages`)
+topcounties[order(-topcounties$`Average Weekly Wages`), ] %>% head(5) %>% select(`Area Name`, `Industry Name`, `Year`, `Average Weekly Wages`) %>% knitr::kable(caption = "5 Counties with the Highest Average Weekly Wages")
+topcounties[order(topcounties$`Average Weekly Wages`), ] %>% head(5) %>% select(`Area Name`, `Industry Name`, `Year`, `Average Weekly Wages`) %>% knitr::kable(caption = "5 Counties with the Lowest Average Weekly Wages")
+```
+
+3. Which education sectors have the highest and lowest weekly wages?
+```{r}
+topedsector <- education %>% group_by(`Industry Name`) %>% top_n(1, `Average Weekly Wages`)
+topedsector[order(-topedsector$`Average Weekly Wages`), ] %>% head(5) %>% select(`Area Name`, `Industry Name`, `Year`, `Average Weekly Wages`) %>% knitr::kable(caption = "5 Education Sectors with the Highest Average Weekly Wages")
+```
+
+
+```{r}
+la_education <- filter(la_education, Quarter == "Annual")
+summary(la_education$`Average Monthly Employment`)
+summary(la_education$`Average Weekly Wages`)
+la <- input[`Area Name` == "Los Angeles County"]
+unique(la$Year)
+la_education <- la %>% filter(str_detect(`Industry Name`, 'Education|education|teaching|school|School|Teaching|academ|Academ|institute|Institute|College|college|university|University'))
+unique(la_education$`Industry Name`)
+input[, n := 1:.N, by = .(Establishments, `Average Weekly Wages`)]
+input <- input[n == 1,][, n := NULL]
+education <- input %>% filter(str_extract_all(input$`NAICS Code`, "61*"))
+```
+```{r}
+la_education[`Industry Name` == "Colleges and Universities"] %>%
+  ggplot(mapping = aes(x = Year, y = `Average Weekly Wages`, group = Year)) +
+  geom_bar(position = 'dodge', stat = 'identity')
+ggplot(la_education, mapping=aes(x=COUNTY, y = PM2.5, group = year)) +
+  geom_bar(mapping=aes(fill=year),stat='identity', position='dodge') +
+  labs(title = "Mean PM2.5 Concentrations per County", y = "Average PM2.5 Concentration") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+```
+```{r}
+wage_pc <- function(x) {
+  x <- x[order(x$Year, decreasing = TRUE), ]
+  pc <- -diff(x$`Average Weekly Wages`)/(x$`Average Weekly Wages`)[-1] *100
+  data.frame(year = x$Year[-length(x$Year)], percent_change = pc)
+}
+la_coluniv <- filter(la_education, `Industry Name` == "Colleges and Universities")
+##Get rid of duplicate rows
+la_coluniv[, n := 1:.N, by = .(Establishments, `Average Weekly Wages`)]
+la_coluniv <- la_coluniv[n == 1,][, n := NULL]
+la_education[, n := 1:.N, by = .(Establishments, `Average Weekly Wages`)]
+la_education <- la_education[n == 1,][, n := NULL]
+la[, n := 1:.N, by = .(Establishments, `Average Weekly Wages`)]
+la <- la[n == 1,][, n := NULL]
+
+la_coluniv_pc <- la_coluniv %>% 
+  group_by(Ownership) %>%
+  do(wage_pc(.))
+```
+
+#Introduction
+An issue that I have seen being constantly spoken about is the economy and the rise of inflation. Being a student in the science field, I have very little background on economics; frankly, the last time I took a course in economics was in high school. I was interested in examining wage disparities, more specifically throughout California and within the education sector, as this is applicable to my area of work.
+
+#### The question that I will be exploring is:
+#### How have wages throughout California, especially within the education sector, changed from 2004 until 2021?
+
+# Methods
+The dataset I used is California's Quarterly Census of Employment and Wages from data.gov (web address: https://catalog.data.gov/dataset/quarterly-census-of-employment-and-wages-qcew). It contains average weekly wages for various industries from 2004 to 2021, also categorized by county and ownership (state government, local government, private).
+
+This dataset is quite large (531.5 MB), so I cleaned the data with a number of steps:
+1. I filtered the dataset to only include average annual wages. This dataset has a column named *quarter*, which subdivides the data per each quarter (1st through 4th) as well as the annual values. In order to control for fluctuations throughout the year, I used the annual values for the subsequent steps.
+2. There were triplicate repeats of each entry based on variations in the NAICS (North American Industry Classification System) code entry. These were removed so that there were fewer observations.
+3. A smaller dataset (*education*) was made by subsetting the dataset by NAICS code values that begin with 61, which is the code for Education Services (https://www.naics.com/search/).
+
+The graphs in this report were made using the ggplot2 package.
+
+#### Dependencies / Packages Used:
+* data.table
+* tidytext
+* ggplot2
+* dplyr
+* tibble
+* forcats
+* tidyr
+* tidyverse
+
+# Results
+
+
+
+
+
