@@ -189,7 +189,7 @@ Table: 5 Education Sectors with the Highest Average Weekly Wages
 |San Luis Obispo County |Management Training          | 2016|                 2587|
 The *Colleges and Universities* industry had the highest average weekly wage out of all the industries within the *education* sector. This makes sense to me given that this category likely encompasses universities with large endowments and high-salaried employees such as coaches and the board of directors.
 
-### 4. Within the *Colleges and Universities* sector, how much have salaries grown over the last decade?
+### 4. Within the *Colleges and Universities* sector, which counties have the highest salaries, and how much have salaries grown over the last decade?
 
 Not surprisingly, the outliers with the highest weekly wages in 2004, 2009, 2012, 2013, 2019 and 2020 come from privately owned colleges and universities in San Mateo County and Santa Clara County. In 2020, San Mateo County, Alameda County, and Los Angeles County have the highest wages. This is likely due to the cost of living in these areas being among the highest in the state.
 
@@ -206,20 +206,58 @@ colluniv[`Area Name` != "California"] %>% ggplot() +
 ```r
 #legend.text = element_text(size = 6)
 ```
-
+To look more closely at how salary has grown, I calculated the percent change for 
 
 ```r
-#la_education <- filter(la_education, Quarter == "Annual")
-#summary(la_education$`Average Monthly Employment`)
-#summary(la_education$`Average Weekly Wages`)
-#la <- input[`Area Name` == "Los Angeles County"]
-#unique(la$Year)
-#la_education <- la %>% filter(str_detect(`Industry Name`, 'Education|education|teaching|school|School|Teaching|academ|Academ|institute|Institute|College|college|university|University'))
-#unique(la_education$`Industry Name`)
-#input[, n := 1:.N, by = .(Establishments, `Average Weekly Wages`)]
-#input <- input[n == 1,][, n := NULL]
-#education <- input %>% filter(str_extract_all(input$`NAICS Code`, "61*"))
+statecolluniv <- colluniv[Ownership == "State Government"] 
+statecolluniv2 <- statecolluniv %>%
+    group_by(`Area Name`) %>%
+    arrange(Year) %>%
+    mutate(pct.chg = 100 *(`Average Weekly Wages` - lag(`Average Weekly Wages`))/lag(`Average Weekly Wages`))
+statecolluniv2 <- as.data.table(statecolluniv2)
+statecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = Year, y = pct.chg, fill = `Area Name`), stat ="identity") +
+  labs(title = "Yearly Percent Changes in Average Weekly Wages of Colleges and Universities Owned by State Governments in California", y = "Percent Change")
 ```
+
+![](index_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
+
+```r
+statecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
+  ggplot() +
+  geom_point(mapping = aes(x = Year, y = pct.chg, color = `Area Name`)) +
+  geom_line(mapping = aes(x = Year, y = pct.chg, color = `Area Name`)) +
+  labs(title = "Yearly Percent Changes in Average Weekly Wage in State Government-Owned Colleges and Universities in California", y = "Percent Change")
+```
+
+![](index_files/figure-html/unnamed-chunk-5-2.png)<!-- -->
+
+```r
+privatecolluniv <- colluniv[Ownership == "Private"] 
+privatecolluniv2 <- privatecolluniv %>%
+    group_by(`Area Name`) %>%
+    arrange(Year) %>%
+    mutate(pct.chg = 100 *(`Average Weekly Wages` - lag(`Average Weekly Wages`))/lag(`Average Weekly Wages`))
+privatecolluniv2 <- as.data.table(privatecolluniv2)
+privatecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
+  ggplot() +
+  geom_bar(mapping = aes(x = Year, y = pct.chg, fill = `Area Name`), stat ="identity") +
+  labs(title = "Yearly Percent Changes in Average Weekly Wage in Privately Owned Colleges and Universities in California", y = "Percent Change")
+```
+
+![](index_files/figure-html/unnamed-chunk-5-3.png)<!-- -->
+
+```r
+privatecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
+  ggplot() +
+  geom_point(mapping = aes(x = Year, y = pct.chg, color = `Area Name`)) +
+  geom_line(mapping = aes(x = Year, y = pct.chg, color = `Area Name`)) +
+  labs(title = "Yearly Percent Changes in Average Weekly Wage in Privately Owned Colleges and Universities in California", y = "Percent Change")
+```
+
+![](index_files/figure-html/unnamed-chunk-5-4.png)<!-- -->
+
 
 ```r
 #la_education[`Industry Name` == "Colleges and Universities"] %>%
