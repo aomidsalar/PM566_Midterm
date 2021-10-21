@@ -35,29 +35,37 @@ if (!file.exists("Quarterly_Census_of_Employment_and_Wages__QCEW_.csv"))
 input <- data.table::fread("Quarterly_Census_of_Employment_and_Wages__QCEW_.csv")
 ```
 
+
 #Introduction
+
 An issue that I have seen being constantly spoken about is the economy and the rise of inflation. Being a student in the science field, I have very little background on economics; frankly, the last time I took a course in economics was in high school. I was interested in examining wage disparities, more specifically throughout California, within the education sector and within colleges and universities, as this is the area I'm currently working in.
 
 #### The question that I will be exploring is:
-#### How have wages throughout California, especially within the education sector, changed from 2004 until 2021?
+#### How have wages throughout California, especially within Colleges and Universities, changed from 2004 until 2020?
 
-# Methods
-The dataset I used is California's Quarterly Census of Employment and Wages from data.gov (https://catalog.data.gov/dataset/quarterly-census-of-employment-and-wages-qcew). It contains data categorized by the following variables:
-* Area type (county, state-wide, US)
-* Area name (name of county)
-* Year (2004 - 2021)
-* Quarter
-* Ownership (state government, federal government, private)
-* NAICS (North American Industry Classification System) level
-* NAICS code
-* Industry name
-* Number of Establishments
-* Average monthly employment
-* 1st, 2nd and 3rd month employment (if there is a quarter designation)
-* Total wages for all workers
-* Average weekly wages
+The dataset I used is California's Quarterly Census of Employment and Wages from data.gov (https://catalog.data.gov/dataset/quarterly-census-of-employment-and-wages-qcew). It contains 4351631 rows and 15 columns, categorized by the following variables:
+
+* Area type (county, state-wide, US; character data)
+* Area name (name of county; character data)
+* Year (2004 - 2021; integer data)
+* Quarter (1st - 4th Quarter; character data)
+* Ownership (state government, federal government, private; character data)
+* NAICS (North American Industry Classification System) level (integer data)
+* NAICS code (character data)
+* Industry name (character data)
+* Number of Establishments (integer data)
+* Average monthly employment (integer data)
+* 1st, 2nd and 3rd month employment (if there is a quarter designation; integer data)
+* Total wages for all workers (numerical data)
+* Average weekly wages (numerical data)
+
 
 The specifications I was interested in looking in for this project were the average weekly wages throughout various counties in California, within the Education as a whole, and within the *Colleges and Universities* industry.
+
+## Methods
+
+The dataset was acquired from the data.gov database and can be downloaded using the following link: https://data.edd.ca.gov/api/views/fisq-v939/rows.csv?accessType=DOWNLOAD
+It was downloaded as a csv (comma-separated values) file, and imported to Rstudio using the *data.table* package.
 
 This dataset is quite large (531.5 MB), so I cleaned the data using the following steps:
 1. I filtered the dataset to only include average annual wages. I did by looking at the column named *quarter*, which subdivides the data per each quarter (1st through 4th) as well as the annual values. In order to control for fluctuations throughout the year, I used the annual values for the subsequent steps. As a result, I removed the *1st, 2nd and 3rd Month Employment* columns as those have NA values when looking at annual data. I also omitted any nationwide observations to focus on California-specific observations only.
@@ -126,7 +134,7 @@ San Francisco County and San Mateo County have the highest median weekly wages o
 counties[order(-counties$median_wage), ] %>% head(5) %>% select(`Area Name`, `Year`, median_wage) %>% knitr::kable(caption = "5 Counties with the Highest Median Weekly Wages per Year")
 ```
 
-The counties with the lowest median wages are Sierra County, Alpine County and Trinity County. These are the least populated counties in California and are in more mountainous areas in Northern and Northeastern California. The wages being so low in these areas likely correspond to seasonal jobs (more jobs in the winter months), and perhaps more part-time or volunteer workers since there are no major cities in these counties. 
+The counties with the lowest median wages are Alpine County, Sierra County, and Trinity County. These are the 1st, 2nd, and 5th least populated counties in California respectively, and are in more mountainous areas in Northern and Northeastern California (reference: https://www.california-demographics.com/counties_by_population). The wages being so low in these areas likely correspond to seasonal jobs (more jobs in the winter months), and perhaps more part-time or volunteer workers since there are no major cities in these counties. 
 
 ```{r}
 counties[order(counties$median_wage), ] %>% head(5) %>% select(`Area Name`, `Year`, median_wage) %>% knitr::kable(caption = "5 Counties with the Lowest Median Weekly Wages per Year")
@@ -139,16 +147,32 @@ edsector <- education[, .(
   median_wage = median(`Average Weekly Wages`, na.rm = TRUE)), 
   by = .(`Area Name`, Year, `Industry Name`)
 ]
-edsector[order(-edsector$median_wage), ] %>% head(5) %>% select(`Area Name`, `Industry Name`, `Year`, median_wage) %>% knitr::kable(caption = "5 Counties with the Highest Median Weekly Wages per Year")
-edsector[order(edsector$median_wage), ] %>% head(5) %>% select(`Area Name`, `Industry Name`, `Year`, median_wage) %>% knitr::kable(caption = "5 Counties with the Highest Median Weekly Wages per Year")
+```
+
+The industries with the highest median wages are *Computer Training*, *Educational Support Services* and *Flight Training*. This makes sense to me given that the computer training category is tech-adjacent. I also know that flying is very costly, and educational support services (college counseling, standardized test preparation) can also be very costly.
+
+```{r}
+edsector[order(-edsector$median_wage), ] %>% head(5) %>% select(`Area Name`, `Industry Name`, `Year`, median_wage) %>% knitr::kable(caption = "Top 5 Median Weekly Wages per Year")
+```
+
+The industries with the lowest median wages are *Language Schools* and *Other Schools and Instruction*. Some contributing factors as to these low values are part-time and volunteer employees.
+
+```{r}
+edsector[order(edsector$median_wage), ] %>% head(5) %>% select(`Area Name`, `Industry Name`, `Year`, median_wage) %>% knitr::kable(caption = "Bottom 5 Median Weekly Wages per Year")
+```
+
+The below table shows the highest weekly wages per industry in the *education* category (the top 5 are shown). The top industries mentioned earlier (*computer training*, *educational support services*, *flight training*) are included here; however, the *Colleges and Universities* industry had the highest average weekly wage out of all the industries within the *education* sector. This makes sense to me given that this category likely encompasses universities with large endowments and high-salaried employees such as coaches and the board of directors. Additionally, this industry will be the focus of the subsequent analysis; I was interested in looking at this in particular because I am a student worker at my university.
+
+```{r}
 topedsector <- education %>% group_by(`Industry Name`) %>% top_n(1, `Average Weekly Wages`)
 topedsector[order(-topedsector$`Average Weekly Wages`), ] %>% head(5) %>% select(`Area Name`, `Industry Name`, `Year`, `Average Weekly Wages`) %>% knitr::kable(caption = "5 Education Sectors with the Highest Average Weekly Wages")
 ```
-The *Colleges and Universities* industry had the highest average weekly wage out of all the industries within the *education* sector. This makes sense to me given that this category likely encompasses universities with large endowments and high-salaried employees such as coaches and the board of directors.
 
 ### 4. Within the *Colleges and Universities* sector, which counties have the highest salaries, and how much have salaries grown over the last decade?
 
-Not surprisingly, the outliers with the highest weekly wages in 2004, 2009, 2012, 2013, 2019 and 2020 come from privately owned colleges and universities in San Mateo County and Santa Clara County. In 2020, San Mateo County, Alameda County, and Los Angeles County have the highest wages. This is likely due to the cost of living in these areas being among the highest in the state.
+This first scatterplot shows the annual average weekly wages in private (left) and public/state government (right) universities throughout California. The outliers that pop out to me are private colleges/universities in San Mateo County (Stanford is located here), Santa Clara County (Santa Clara University is here), and Los Angeles County (USC, among others). These are all in areas with major cities and a high cost-of-living. Overall, private colleges and universities in Los Angeles seem to have consistently higher wages from 2010 onwards compared to other private colleges and universities in California. Additionally, there seems to be a smaller range in average wages in the colleges and universities that are owned by the state (the points are more clustered together vertically). This is likely due to standards and policies that are maintained across these institutions.
+Something to note is that some counties do not have both private and state-government run colleges and universities, and some annual wages were not reported.
+
 ```{r}
 colluniv <- filter(education, `Industry Name` == "Colleges and Universities")
 colluniv[`Area Name` != "California"] %>% ggplot() +
@@ -157,7 +181,11 @@ colluniv[`Area Name` != "California"] %>% ggplot() +
   theme(legend.key.size = unit(0.2,"cm"), legend.spacing = unit(0.1,"cm")) +
   facet_wrap(~Ownership)
 ```
-To look more closely at how salary has grown, I calculated the percent change for 
+
+To look more closely at how salary has grown, I calculated the percent changes (compared to the previous year reported) for privately owned and state government owned colleges and universities. 
+
+The bar graph plotting these percent changes for colleges and universities owned by the state government is below. Some years with more negative percent changes that stand out to me are 2004 to 2005, and 2008-2010. I know that there there was a big recession during this time period, especially in the late 2000s. For the most part, however, there are positive percent changes in wages, which likely have to do with annual cost-of-living adjustments.
+
 ```{r}
 statecolluniv <- colluniv[Ownership == "State Government"] 
 statecolluniv2 <- statecolluniv %>%
@@ -168,12 +196,12 @@ statecolluniv2 <- as.data.table(statecolluniv2)
 statecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
   ggplot() +
   geom_bar(mapping = aes(x = Year, y = pct.chg, fill = `Area Name`), stat ="identity") +
-  labs(title = "Yearly Percent Changes in Average Weekly Wages of Colleges and Universities Owned by State Governments in California", y = "Percent Change")
-statecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
-  ggplot() +
-  geom_point(mapping = aes(x = Year, y = pct.chg, color = `Area Name`)) +
-  geom_line(mapping = aes(x = Year, y = pct.chg, color = `Area Name`)) +
-  labs(title = "Yearly Percent Changes in Average Weekly Wage in State Government-Owned Colleges and Universities in California", y = "Percent Change")
+  labs(title = "Percent Changes in Average Weekly Wages of State Government \n Owned Colleges and Universities in California", y = "Percent Change")
+```
+
+Below is the bar graph showing the percent changes for privately owned colleges and universities in California. Overall, I see fewer negative percent changes here compared to the previous graph, and this is likely due to the nature of these universities not having government regulation and having more autonomy with how they manage themselves. What stands out to me the most here is the negative percent change from 2019 to 2020 in San Mateo County. This likely is related to the covid19 pandemic. 
+
+```{r}
 privatecolluniv <- colluniv[Ownership == "Private"] 
 privatecolluniv2 <- privatecolluniv %>%
     group_by(`Area Name`) %>%
@@ -183,12 +211,10 @@ privatecolluniv2 <- as.data.table(privatecolluniv2)
 privatecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
   ggplot() +
   geom_bar(mapping = aes(x = Year, y = pct.chg, fill = `Area Name`), stat ="identity") +
-  labs(title = "Yearly Percent Changes in Average Weekly Wage in Privately Owned Colleges and Universities in California", y = "Percent Change")
-privatecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
-  ggplot() +
-  geom_point(mapping = aes(x = Year, y = pct.chg, color = `Area Name`)) +
-  geom_line(mapping = aes(x = Year, y = pct.chg, color = `Area Name`)) +
-  labs(title = "Yearly Percent Changes in Average Weekly Wage in Privately Owned Colleges and Universities in California", y = "Percent Change")
+  labs(title = "Percent Changes in Average Weekly Wage of Privately Owned \n Colleges and Universities in California", y = "Percent Change")
 ```
 
+# Conclusion
+
+From this analysis, I have found that counties with major cities generally have higher wages than those that do not. Many of the top wages come from industries that are tech-related and are especially prevalent in the areas surrounding Silicon Valley. There is less county-wide variation in average weekly wages in colleges and universities owned by the state government compared to those that are privately owned. Overall, colleges and universities seem to have positive percent changes in average weekly wages year to year, with most of the exceptions occurring during times of economic crisis.
 
