@@ -1,7 +1,7 @@
 ---
 title: "Midterm Project"
 author: "Audrey Omidsalar"
-date: "10/24/2021"
+date: "October 24, 2021"
 output:
   html_document:
     toc: yes
