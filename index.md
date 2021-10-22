@@ -26,13 +26,12 @@ if (!file.exists("Quarterly_Census_of_Employment_and_Wages__QCEW_.csv"))
 input <- data.table::fread("Quarterly_Census_of_Employment_and_Wages__QCEW_.csv")
 ```
 
-
-#Introduction
+# Introduction
 
 An issue that I have seen being constantly spoken about is the economy and the rise of inflation. Being a student in the science field, I have very little background on economics; frankly, the last time I took a course in economics was in high school. I was interested in examining wage disparities, more specifically throughout California, within the education sector and within colleges and universities, as this is the area I'm currently working in.
 
 #### The question that I will be exploring is:
-#### How have wages throughout California, especially within Colleges and Universities, changed from 2004 until 2020?
+#### How have wages throughout California, in the education sector, and in Colleges and Universities changed from 2004 until 2020?
 
 The dataset I used is California's Quarterly Census of Employment and Wages from data.gov (https://catalog.data.gov/dataset/quarterly-census-of-employment-and-wages-qcew). It contains 4351631 rows and 15 columns, categorized by the following variables:
 
@@ -53,7 +52,7 @@ The dataset I used is California's Quarterly Census of Employment and Wages from
 
 The specifications I was interested in looking in for this project were the average weekly wages throughout various counties in California, within the Education as a whole, and within the *Colleges and Universities* industry.
 
-## Methods
+# Methods
 
 The dataset was acquired from the data.gov database and can be downloaded using the following link: https://data.edd.ca.gov/api/views/fisq-v939/rows.csv?accessType=DOWNLOAD
 It was downloaded as a csv (comma-separated values) file, and imported to Rstudio using the *data.table* package.
@@ -71,7 +70,6 @@ The graphs in this report were made using the ggplot2 package.
 * ggplot2
 * dplyr
 * tibble
-* forcats
 * tidyr
 * tidyverse
 
@@ -261,12 +259,14 @@ Something to note is that some counties do not have both private and state-gover
 
 
 ```r
+colors <- c("Alameda County" = "#8B0000", "Contra Costa County" = "#CD5C5C", "Fresno County" = "#FFC0CB", "Kern County" = "#FFA500", "Los Angeles County" = "#FF4500", "Monterey County" = "#FFD700", "Orange County" = "#BDB76B", "Riverside County" = "#3CB371", "Sacramento County" = "#006400", "San Bernardino County" = "#7CFC00", "San Diego County" = "#20B2AA", "San Francisco County" = "#AFEEEE", "San Luis Obispo County" = "#5F9EA0", "Santa Barbara County" = "#1E90FF", "Santa Clara County" = "#0000CD", "Solano County" = "#9370DB", "Sonoma County" = "#800080", "San Mateo County" = "#FF00FF", "Ventura County" = "#808080")
 colluniv <- filter(education, `Industry Name` == "Colleges and Universities")
 colluniv[`Area Name` != "California"] %>% ggplot() +
   geom_point(mapping=aes(x=Year, y = `Average Weekly Wages`, group = `Area Name`, color=`Area Name`)) +
   labs(title = "Average Weekly Wages at Colleges and Universities in California", x  = "Year", y = "Average Weekly Wages") +
   theme(legend.key.size = unit(0.2,"cm"), legend.spacing = unit(0.1,"cm")) +
-  facet_wrap(~Ownership)
+  facet_wrap(~Ownership) +
+  scale_color_manual(values = colors)
 ```
 
 ![](index_files/figure-html/unnamed-chunk-11-1.png)<!-- -->
@@ -286,7 +286,9 @@ statecolluniv2 <- as.data.table(statecolluniv2)
 statecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
   ggplot() +
   geom_bar(mapping = aes(x = Year, y = pct.chg, fill = `Area Name`), stat ="identity") +
-  labs(title = "Percent Changes in Average Weekly Wages of State Government \n Owned Colleges and Universities in California", y = "Percent Change")
+  labs(title = "Percent Changes in Average Weekly Wages of State Government \n Owned Colleges and Universities in California", y = "Percent Change") +
+  scale_fill_manual(values = colors) +
+  theme(legend.key.size = unit(0.2,"cm"), legend.spacing = unit(0.1,"cm"))
 ```
 
 ![](index_files/figure-html/unnamed-chunk-12-1.png)<!-- -->
@@ -304,7 +306,9 @@ privatecolluniv2 <- as.data.table(privatecolluniv2)
 privatecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
   ggplot() +
   geom_bar(mapping = aes(x = Year, y = pct.chg, fill = `Area Name`), stat ="identity") +
-  labs(title = "Percent Changes in Average Weekly Wage of Privately Owned \n Colleges and Universities in California", y = "Percent Change")
+  labs(title = "Percent Changes in Average Weekly Wage of Privately Owned \n Colleges and Universities in California", y = "Percent Change") +
+  scale_fill_manual(values = colors) +
+  theme(legend.key.size = unit(0.2,"cm"), legend.spacing = unit(0.1,"cm"))
 ```
 
 ![](index_files/figure-html/unnamed-chunk-13-1.png)<!-- -->
