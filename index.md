@@ -69,11 +69,9 @@ The graphs in this report were made using the ggplot2 package.
 
 #### Dependencies / Packages Used:
 * data.table
-* tidytext
 * ggplot2
 * dplyr
 * tibble
-* tidyr
 * tidyverse
 
 
