@@ -184,7 +184,7 @@ To look more closely at how salary has grown, I calculated the percent changes (
 
 The bar graph plotting these percent changes for colleges and universities owned by the state government is below. Some years with more negative percent changes that stand out to me are 2008-2010. I know that there there was a big recession during this time period. For the most part and especially in the last five years, there are positive percent changes in wages, which likely has to do with annual cost-of-living adjustments.
 
-```{r state pc}
+```{r statepc}
 statecolluniv <- colluniv[Ownership == "State Government"] 
 statecolluniv2 <- statecolluniv %>%
     group_by(`Area Name`) %>%
@@ -201,7 +201,7 @@ statecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
 
 Below is the bar graph showing the percent changes for privately owned colleges and universities in California. Overall, I see more negative percent changes here compared to the previous graph, and this is likely due to the nature of these universities not having government regulation and having more autonomy with how they manage themselves. What stands out to me the most here is the positive percent change from 2018 to 2019 in San Mateo County. I believe Stanford University is the major private university in this county, and I found an article stating that their football coach David Shaw received "over 8.9 million in pay" in 2019, so this was likely a big contributor to the jump in average weekly wage for that year<sup>5</sup>.  
 
-```{r private pc}
+```{r privatepc}
 privatecolluniv <- colluniv[Ownership == "Private"] 
 privatecolluniv2 <- privatecolluniv %>%
     group_by(`Area Name`) %>%

@@ -291,7 +291,7 @@ statecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
   theme(legend.key.size = unit(0.2,"cm"), legend.spacing = unit(0.1,"cm"))
 ```
 
-![](index_files/figure-html/state pc-1.png)<!-- -->
+![](index_files/figure-html/statepc-1.png)<!-- -->
 
 Below is the bar graph showing the percent changes for privately owned colleges and universities in California. Overall, I see more negative percent changes here compared to the previous graph, and this is likely due to the nature of these universities not having government regulation and having more autonomy with how they manage themselves. What stands out to me the most here is the positive percent change from 2018 to 2019 in San Mateo County. I believe Stanford University is the major private university in this county, and I found an article stating that their football coach David Shaw received "over 8.9 million in pay" in 2019, so this was likely a big contributor to the jump in average weekly wage for that year<sup>5</sup>.  
 
@@ -311,7 +311,7 @@ privatecolluniv2[!is.na(pct.chg) & `Area Name` != "California"] %>%
   theme(legend.key.size = unit(0.2,"cm"), legend.spacing = unit(0.1,"cm"))
 ```
 
-![](index_files/figure-html/private pc-1.png)<!-- -->
+![](index_files/figure-html/privatepc-1.png)<!-- -->
 
 # Conclusion
 
