@@ -39,7 +39,8 @@ An issue that I have seen being constantly spoken about is the economy and the r
 #### The question that I will be exploring is:
 #### How have wages throughout California, in the education sector, and in Colleges and Universities changed from 2004 until 2020?
 
-The dataset I used is California's Quarterly Census of Employment and Wages from data.gov (https://catalog.data.gov/dataset/quarterly-census-of-employment-and-wages-qcew). It contains 4351631 rows and 15 columns, categorized by the following variables:
+The dataset I used is California's Quarterly Census of Employment and Wages from data.gov (https://catalog.data.gov/dataset/quarterly-census-of-employment-and-wages-qcew). 
+It contains 4351631 rows and 15 columns, categorized by the following variables:
 
 * Area type (county, state-wide, US; character data)
 * Area name (name of county; character data)
