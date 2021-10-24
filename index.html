@@ -285,7 +285,8 @@ input &lt;- data.table::fread(&quot;Quarterly_Census_of_Employment_and_Wages__QC
 </div>
 <div id="methods" class="section level1">
 <h1>Methods</h1>
-<p>The dataset was acquired from the data.gov database and can be downloaded using the following link: <a href="https://data.edd.ca.gov/api/views/fisq-v939/rows.csv?accessType=DOWNLOAD" class="uri">https://data.edd.ca.gov/api/views/fisq-v939/rows.csv?accessType=DOWNLOAD</a> It was downloaded as a csv (comma-separated values) file, and imported to Rstudio using the <em>data.table</em> package.</p>
+<p>The dataset was acquired from the data.gov database and can be downloaded using the following link: <a href="https://data.edd.ca.gov/api/views/fisq-v939/rows.csv?accessType=DOWNLOAD" class="uri">https://data.edd.ca.gov/api/views/fisq-v939/rows.csv?accessType=DOWNLOAD</a></p>
+<p>It was downloaded as a csv (comma-separated values) file, and imported to Rstudio using the <em>data.table</em> package.</p>
 <p>This dataset is quite large (531.5 MB), so I cleaned the data using the following steps:</p>
 <ol style="list-style-type: decimal">
 <li><p>I filtered the dataset to only include average annual wages. I did by looking at the column named <em>quarter</em>, which subdivides the data per each quarter (1st through 4th) as well as the annual values. In order to control for fluctuations throughout the year, I used the annual values for the subsequent steps. As a result, I removed the <em>1st, 2nd and 3rd Month Employment</em> columns as those have NA values when looking at annual data.</p></li>

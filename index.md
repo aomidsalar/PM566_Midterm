@@ -55,6 +55,7 @@ The specifications I was interested in looking in for this project were the aver
 # Methods
 
 The dataset was acquired from the data.gov database and can be downloaded using the following link: https://data.edd.ca.gov/api/views/fisq-v939/rows.csv?accessType=DOWNLOAD
+
 It was downloaded as a csv (comma-separated values) file, and imported to Rstudio using the *data.table* package.
 
 This dataset is quite large (531.5 MB), so I cleaned the data using the following steps:
